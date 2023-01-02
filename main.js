@@ -56,8 +56,10 @@ const COST = {
     'F2': 1.5,
     'F3': 2,
     'W': 3,
-    'M': 1.25,
+    'M': 1,
 };
+
+const coordinatesToIndex = (coordinates) => coordinates.x + 10 * coordinates.y;
 
 const createGrid = (size) => {
     const grid = document.createElement('div');
@@ -143,7 +145,7 @@ const updatePointPosition = (element, coordinates) => {
     element.style.top = `${y * 55 + 5}px`;
 };
 
-const createPoint = (coordinates) => {
+const createPoint = (coordinates, label) => {
     const circle = document.createElement('div');
     circle.style.height = `${POINT_INNER_SIZE_PX}px`;
     circle.style.width = `${POINT_INNER_SIZE_PX}px`;
@@ -152,6 +154,12 @@ const createPoint = (coordinates) => {
     circle.style.position = 'absolute';
     circle.style.background = 'white';
     circle.style.zIndex = 1;
+
+    circle.textContent = label;
+    circle.style.textAlign = 'center';
+    circle.style.color = '#b457f7';
+    circle.style.fontSize = '30px';
+    circle.style.lineHeight = '44px';
 
     updatePointPosition(circle, coordinates);
 
@@ -183,7 +191,7 @@ const createLine = (pointA, pointB) => {
 
 const loadMap = () => {
     COURSE.forEach((point, index) => {
-        createPoint(point);
+        createPoint(point, index + 1);
 
 
         const nextIndex = index + 1;
@@ -210,11 +218,11 @@ const trackPoint = (pointToTrackIndex = 0) => {
     }
 
     window.pointToTrack = pointToTrack;
-    document.getElementById('tracker').textContent = `Go to (${pointToTrack.x}, ${pointToTrack.y})`;
+    document.getElementById('tracker').textContent = `Go to ${window.pointToTrackIndex + 1}`;
 };
 
 const updateCost = (coordinates) => {
-    const moveIndex = coordinates.x + coordinates.y * 10;
+    const moveIndex = coordinatesToIndex(coordinates);
     const terrain = MAP[moveIndex];
     const moveCost = COST[terrain];
     console.log(`Cost ${moveCost} for move on ${MAP[moveIndex]}`);
