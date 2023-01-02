@@ -1,9 +1,30 @@
+const MAP = [
+    {
+        'x': 0,
+        'y': 0,
+    }, {
+        'x': 2,
+        'y': 4,
+    }, {
+        'x': 7,
+        'y': 1,
+    }, {
+        'x': 4,
+        'y': 9,
+    },
+];
+
 const GRID_SIZE = 10;
 const GRID_GAP_PX = 5;
 const TILE_SIZE_PX = 50;
 const PLAYER_SIZE_PX = 40;
+const POINT_BORDER_PX = 3;
+const POINT_SIZE_PX = TILE_SIZE_PX;
+const POINT_INNER_SIZE_PX = POINT_SIZE_PX - 2 * POINT_BORDER_PX;
+
 const PLAYER_POSITION_INCREMENT = TILE_SIZE_PX + (TILE_SIZE_PX - PLAYER_SIZE_PX) / 2;
 const PLAYER_POSITION_CONSTANT = TILE_SIZE_PX - PLAYER_SIZE_PX;
+
 
 const createGrid = (size) => {
     const grid = document.createElement('div');
@@ -21,9 +42,6 @@ const createGrid = (size) => {
         tile.style.height = `${TILE_SIZE_PX}px`;
         tile.style.width = `${TILE_SIZE_PX}px`;
         tile.style.backgroundColor = 'white';
-        tile.onload = (element) => {
-            console.log(element.clientTop);
-        };
         grid.appendChild(tile);
     }
 
@@ -35,10 +53,11 @@ const createPlayer = () => {
     window.player = document.createElement('img');
     window.player.src = texture;
     window.player.style.position = 'absolute';
-    window.player.style.width = '40px';
-    window.player.style.height = '40px';
+    window.player.style.width = `${PLAYER_SIZE_PX}px`;
+    window.player.style.height = `${PLAYER_SIZE_PX}px`;
     window.player.style.top = 0;
     window.playerCoordinates = {x: 0, y: 0};
+    window.player.style.zIndex = 2;
 
     window.container.appendChild(window.player);
 };
@@ -70,24 +89,83 @@ const listenOnArrows = () => {
         }
 
         window.playerCoordinates = result;
-        updatePlayerPosition();
+        updatePlayerPosition(window.player, window.playerCoordinates);
     };
 };
 
-const updatePlayerPosition = () => {
-    const {x, y} = window.playerCoordinates;
-    window.player.style.left = `${x * PLAYER_POSITION_INCREMENT + PLAYER_POSITION_CONSTANT}px`;
-    window.player.style.top = `${y * PLAYER_POSITION_INCREMENT + PLAYER_POSITION_CONSTANT}px`;
+const updatePlayerPosition = (element, coordinates) => {
+    const {x, y} = coordinates;
+    element.style.left = `${x * PLAYER_POSITION_INCREMENT + PLAYER_POSITION_CONSTANT}px`;
+    element.style.top = `${y * PLAYER_POSITION_INCREMENT + PLAYER_POSITION_CONSTANT}px`;
+};
+
+const updatePointPosition = (element, coordinates) => {
+    const {x, y} = coordinates;
+    element.style.left = `${x * 55 + 5}px`;
+    element.style.top = `${y * 55 + 5}px`;
+};
+
+const createPoint = (coordinates) => {
+    const circle = document.createElement('div');
+    circle.style.height = `${POINT_INNER_SIZE_PX}px`;
+    circle.style.width = `${POINT_INNER_SIZE_PX}px`;
+    circle.style.border = `${POINT_BORDER_PX}px solid #b457f7`;
+    circle.style.borderRadius = '50%';
+    circle.style.position = 'absolute';
+    circle.style.background = 'white';
+    circle.style.zIndex = 1;
+
+    updatePointPosition(circle, coordinates);
+
+    window.container.appendChild(circle);
+};
+
+const createLine = (pointA, pointB) => {
+    console.log('LINE');
+    const line = document.createElement('div');
+    line.style.height = '3px';
+    line.style.background = '#b457f7';
+    line.style.position = 'absolute';
+
+    const dx = pointB.x - pointA.x;
+    const dy = pointB.y - pointA.y;
+
+    const distance = TILE_SIZE_PX * Math.sqrt(dx * dx + dy * dy) + 28;
+    line.style.width = `${distance}px`;
+
+    const {x, y} = pointA;
+    line.style.left = `${x * 55 + 28}px`;
+    line.style.top = `${y * 55 + 28}px`;
+
+    const theta = Math.atan2(dy, dx);
+    line.style.transformOrigin = 0;
+    line.style.rotate = `${theta}rad`;
+
+    window.container.appendChild(line);
+};
+
+const loadMap = () => {
+    console.log(MAP);
+    MAP.forEach((point, index) => {
+        createPoint(point);
+
+
+        const nextIndex = index + 1;
+        const nextPoint = MAP[nextIndex];
+
+        if (nextPoint) {
+            createLine(point, nextPoint);
+        }
+    });
 };
 
 window.addEventListener('DOMContentLoaded', (event) => {
-    console.log('123');
-
     window.container = document.getElementById('container');
 
     createGrid(GRID_SIZE);
     createPlayer();
-    updatePlayerPosition();
+    updatePlayerPosition(window.player, {x: 0, y: 0});
+    loadMap();
     listenOnArrows();
 });
 
