@@ -7,14 +7,48 @@
     <style>
         body {
             margin: 10px;
+            font-size: 30px;
+            display: flex;
+        }
+
+        .inline-image {
+            height: 30px;
+            width: 30px;
         }
     </style>
 </head>
 <body>
-<div id="container" style="position:relative;"></div>
-<div id="tracker" style="font-size: 30px;"></div>
-<div id="cost" style="font-size: 30px;"></div>
-<div id="previous" style="font-size: 30px;"></div>
-<div id="best" style="font-size: 30px;"></div>
+<div id="game">
+    <div id="tracker"></div>
+    <div id="container" style="position:relative;"></div>
+    <div id="cost"></div>
+    <div id="previous"></div>
+    <div id="best"></div>
+</div>
+<ul id="howto">
+    <li>
+        Use ⬅️ ️⬆️ ➡️ ⬇️ to move the runner <img class="inline-image" src="runner.png"> in the terrain.
+    </li>
+    <li>
+        Visit all of the points on the course in order from 1 to 4
+    </li>
+    <li>
+        Colors on the board represent various terrain types. Some terrain is easier and some harder to run across
+        <ul>
+            <li>Easy - tall "white" forrest and <span style="background: yellow">meadows</span></li>
+            <li>Medium - <span style="background: lightgreen">mixed forrest</span></li>
+            <li>Hard - <span style="background: darkgreen">thick forrest</span> and
+                <span style="background: lightblue">water</span></li>
+            <li>Obstacle - running across black obstacles is impossible</li>
+        </ul>
+    </li>
+    <li>
+        Going through each of these terrains will cost you some energy. Total cost will be visible under the board.
+    </li>
+    <li>
+        Find out the path with the lowest cost and have fun!
+    </li>
+</ul>
+
 </body>
 </html>
