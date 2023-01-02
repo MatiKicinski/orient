@@ -23,6 +23,7 @@ const COURSE = [
 // F3 - Dark Green Forrest
 // W - Water
 // M - Meadow
+// O - Obstacle
 const MAP = [
     'F1', 'F3', 'F3', 'W', 'M', 'F2', 'F2', 'F2', 'F2', 'W',
     'M', 'M', 'F1', 'F1', 'F2', 'F2', 'F2', 'F1', 'W', 'F3',
@@ -31,8 +32,8 @@ const MAP = [
     'W', 'W', 'F2', 'F2', 'F2', 'F2', 'F2', 'F1', 'F2', 'F3',
     'W', 'W', 'M', 'F2', 'F2', 'F1', 'F1', 'F1', 'F2', 'F1',
     'W', 'M', 'M', 'F2', 'F2', 'F2', 'F1', 'F1', 'F2', 'M',
-    'W', 'M', 'M', 'M', 'F2', 'F2', 'F2', 'F1', 'F2', 'F3',
-    'W', 'W', 'M', 'F2', 'F2', 'F2', 'F2', 'F1', 'F3', 'F3',
+    'W', 'M', 'M', 'M', 'O', 'O', 'F2', 'F1', 'F2', 'F3',
+    'W', 'W', 'M', 'F2', 'F2', 'F2', 'F2', 'O', 'F3', 'F3',
     'W', 'W', 'F2', 'F2', 'F2', 'F2', 'F2', 'F3', 'F3', 'F3',
 ];
 
@@ -53,6 +54,7 @@ const TERRAIN = {
     'F3': 'darkgreen',
     'W': 'lightblue',
     'M': 'yellow',
+    'O': 'black',
 };
 
 const COST = {
@@ -105,6 +107,10 @@ const isWithinGrid = (coordinates) => {
     return coordinates.x >= 0 && coordinates.x < GRID_SIZE && coordinates.y >= 0 && coordinates.y < GRID_SIZE;
 };
 
+const isTargetAnObstacle = (coordinates) => {
+    return MAP[coordinatesToIndex(coordinates)] == 'O';
+};
+
 const listenOnArrows = () => {
     const moves = {
         'ArrowUp': {x: 0, y: -1},
@@ -123,7 +129,7 @@ const listenOnArrows = () => {
             y: window.playerCoordinates.y + move.y,
         };
 
-        if (!isWithinGrid(result)) {
+        if (!isWithinGrid(result) || isTargetAnObstacle(result)) {
             return;
         }
 
