@@ -48,7 +48,7 @@ const POINT_INNER_SIZE_PX = POINT_SIZE_PX - 2 * POINT_BORDER_PX;
 const PLAYER_POSITION_INCREMENT = TILE_SIZE_PX + (TILE_SIZE_PX - PLAYER_SIZE_PX) / 2;
 const PLAYER_POSITION_CONSTANT = TILE_SIZE_PX - PLAYER_SIZE_PX;
 
-const TERRAIN = {
+export const TERRAIN = {
     'F1': 'white',
     'F2': 'lightgreen',
     'F3': 'darkgreen',
@@ -66,28 +66,6 @@ const COST = {
 };
 
 const coordinatesToIndex = (coordinates) => coordinates.x + 10 * coordinates.y;
-
-const createGrid = (size) => {
-    const grid = document.createElement('div');
-    grid.style.display = 'grid';
-    grid.style.background = 'black';
-    grid.style.gap = `${GRID_GAP_PX}px`;
-    grid.style.border = `${GRID_GAP_PX}px solid black`;
-    grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-    grid.style.width = 'fit-content';
-
-    const elementsNumber = size * size;
-
-    for (let i = 0; i < elementsNumber; i++) {
-        const tile = document.createElement('div');
-        tile.style.height = `${TILE_SIZE_PX}px`;
-        tile.style.width = `${TILE_SIZE_PX}px`;
-        tile.style.backgroundColor = TERRAIN[MAP[i]] || 'purple';
-        grid.appendChild(tile);
-    }
-
-    window.container.appendChild(grid);
-};
 
 const createPlayer = () => {
     const texture = 'runner.png';
@@ -155,7 +133,7 @@ const updatePointPosition = (element, coordinates) => {
     element.style.top = `${y * 55 + 5}px`;
 };
 
-const createPoint = (coordinates, label) => {
+const loadPoint = (coordinates, label) => {
     const circle = document.createElement('div');
     circle.style.height = `${POINT_INNER_SIZE_PX}px`;
     circle.style.width = `${POINT_INNER_SIZE_PX}px`;
@@ -200,12 +178,19 @@ const createLine = (pointA, pointB) => {
 };
 
 const loadMap = () => {
-    COURSE.forEach((point, index) => {
-        createPoint(point, index + 1);
+    for (let i = 0; i < MAP.length; i++) {
+        const tile = document.getElementById('grid').children[i];
+        tile.style.backgroundColor = TERRAIN[MAP[i]] || 'purple';
+    }
+};
+
+export function loadCourse(course = COURSE) {
+    course.forEach((point, index) => {
+        loadPoint(point, index + 1);
 
 
         const nextIndex = index + 1;
-        const nextPoint = COURSE[nextIndex];
+        const nextPoint = course[nextIndex];
 
         if (nextPoint) {
             createLine(point, nextPoint);
@@ -245,11 +230,91 @@ const updateCost = (coordinates) => {
     document.getElementById('cost').textContent = `Cost: ${window.cost}`;
 };
 
+function createTile(id) {
+    const tile = document.createElement('div');
+    tile.style.height = `${TILE_SIZE_PX}px`;
+    tile.style.width = `${TILE_SIZE_PX}px`;
+    tile.style.backgroundColor = 'purple';
+    tile.id = id;
+
+    return tile;
+}
+
+export function createGrid(width, height) {
+    const grid = document.createElement('div');
+    grid.id = 'grid';
+    grid.style.display = 'grid';
+    grid.style.background = 'black';
+    grid.style.gap = `${GRID_GAP_PX}px`;
+    grid.style.border = `${GRID_GAP_PX}px solid black`;
+    grid.style.gridTemplateColumns = `repeat(${width}, 1fr)`;
+    grid.style.gridTemplateRows = `repeat(${height}, 1fr)`;
+    grid.style.width = 'fit-content';
+
+    const elementsNumber = width * height;
+
+    for (let i = 0; i < elementsNumber; i++) {
+        const tile = createTile(i);
+        grid.appendChild(tile);
+    }
+
+    window.container.appendChild(grid);
+};
+
+export function updateGrid(width, height) {
+    const grid = document.getElementById('grid');
+    grid.style.gridTemplateColumns = `repeat(${width}, 1fr)`;
+    grid.style.gridTemplateRows = `repeat(${height}, 1fr)`;
+
+    const elementsNumber = width * height;
+    console.log(grid.children[0]);
+
+    const terrainOptionsMax = Object.keys(TERRAIN).length;
+    const currentMap = [];
+
+    for (let i = 0; i < elementsNumber; i++) {
+        let tile = grid.children[i];
+
+        if (!tile) {
+            tile = createTile(i);
+            grid.appendChild(tile);
+        }
+
+        const terrrainKeys = Object.keys(TERRAIN);
+        const randomIndex = parseInt(Math.random() * terrainOptionsMax);
+        console.log(randomIndex);
+        const terrainType = terrrainKeys[randomIndex];
+        currentMap.push(terrainType);
+        tile.style.backgroundColor = TERRAIN[terrainType];
+    }
+
+    window.currentMap = currentMap;
+}
+
+export function exportMap() {
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(window.currentMap));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute('href', dataStr);
+    downloadAnchorNode.setAttribute('download', 'scene.json');
+    downloadAnchorNode.click();
+}
+
+export function updateTile(index, terrainType) {
+    const tile = document.getElementById('grid').children[index];
+    tile.style.backgroundColor = TERRAIN[terrainType];
+    window.currentMap[index] = terrainType;
+}
+
+export function createPoint(index) {
+    coordinatesToIndex();
+}
+
 export function init() {
-    createGrid(GRID_SIZE);
+    createGrid(GRID_SIZE, GRID_SIZE);
     createPlayer();
     updatePlayerPosition(window.player, {x: 0, y: 0});
     loadMap();
+    loadCourse();
     listenOnArrows();
     trackPoint();
 }
