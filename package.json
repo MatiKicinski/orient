@@ -1,0 +1,9 @@
+{
+  "name": "orient",
+  "version": "1.0.0",
+  "description": "A simple orienteering game in 2 dimensions.",
+  "main": "main.js",
+  "author": "Mati Kiciński",
+  "license": "MIT",
+  "private": true
+}
