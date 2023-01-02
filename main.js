@@ -14,6 +14,10 @@ const COURSE = [
     },
 ];
 
+// const randomIntBelowTen = () => parseInt(Math.random() * 9);
+//
+// const COURSE = Array(5).fill(null).map(() => ({x: randomIntBelowTen(), y: randomIntBelowTen()}));
+
 // F1 - White Forrest
 // F2 - Light Green Forrest
 // F3 - Dark Green Forrest
