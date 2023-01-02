@@ -1,7 +1,7 @@
 const MAP = [
     {
-        'x': 0,
-        'y': 0,
+        'x': 1,
+        'y': 1,
     }, {
         'x': 2,
         'y': 4,
@@ -97,6 +97,10 @@ const updatePlayerPosition = (element, coordinates) => {
     const {x, y} = coordinates;
     element.style.left = `${x * PLAYER_POSITION_INCREMENT + PLAYER_POSITION_CONSTANT}px`;
     element.style.top = `${y * PLAYER_POSITION_INCREMENT + PLAYER_POSITION_CONSTANT}px`;
+
+    if (!!window.pointToTrack && coordinates.x == window.pointToTrack.x && coordinates.y == window.pointToTrack.y) {
+        trackPoint(window.pointToTrackIndex + 1);
+    }
 };
 
 const updatePointPosition = (element, coordinates) => {
@@ -121,7 +125,6 @@ const createPoint = (coordinates) => {
 };
 
 const createLine = (pointA, pointB) => {
-    console.log('LINE');
     const line = document.createElement('div');
     line.style.height = '3px';
     line.style.background = '#b457f7';
@@ -145,7 +148,6 @@ const createLine = (pointA, pointB) => {
 };
 
 const loadMap = () => {
-    console.log(MAP);
     MAP.forEach((point, index) => {
         createPoint(point);
 
@@ -159,6 +161,24 @@ const loadMap = () => {
     });
 };
 
+const trackPoint = (pointToTrackIndex = 0) => {
+    window.pointToTrackIndex = pointToTrackIndex;
+    const pointToTrack = MAP[pointToTrackIndex];
+
+    if (!pointToTrack) {
+        document.getElementById('tracker').textContent = `FINISHED!!!`;
+        setTimeout(() => {
+            if (window.confirm('Well done! You finished the course. Click OK to restart the game.')) {
+                location.reload();
+            }
+        }, 0);
+        return;
+    }
+
+    window.pointToTrack = pointToTrack;
+    document.getElementById('tracker').textContent = `Go to (${pointToTrack.x}, ${pointToTrack.y})`;
+};
+
 window.addEventListener('DOMContentLoaded', (event) => {
     window.container = document.getElementById('container');
 
@@ -167,6 +187,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
     updatePlayerPosition(window.player, {x: 0, y: 0});
     loadMap();
     listenOnArrows();
+    trackPoint();
 });
 
 
