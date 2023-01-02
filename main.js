@@ -1,4 +1,4 @@
-const MAP = [
+const COURSE = [
     {
         'x': 1,
         'y': 1,
@@ -14,6 +14,24 @@ const MAP = [
     },
 ];
 
+// F1 - White Forrest
+// F2 - Light Green Forrest
+// F3 - Dark Green Forrest
+// W - Water
+// M - Meadow
+const MAP = [
+    'F1', 'F3', 'F3', 'W', 'M', 'F2', 'F2', 'F2', 'F2', 'W',
+    'M', 'M', 'F1', 'F1', 'F2', 'F2', 'F2', 'F1', 'W', 'F3',
+    'M', 'M', 'F3', 'F1', 'F2', 'F3', 'F2', 'F1', 'W', 'F3',
+    'M', 'W', 'F3', 'F2', 'F3', 'F2', 'F2', 'F1', 'F2', 'W',
+    'W', 'W', 'F2', 'F2', 'F2', 'F2', 'F2', 'F1', 'F2', 'F3',
+    'W', 'W', 'M', 'F2', 'F2', 'F1', 'F1', 'F1', 'F2', 'F1',
+    'W', 'M', 'M', 'F2', 'F2', 'F2', 'F1', 'F1', 'F2', 'M',
+    'W', 'M', 'M', 'M', 'F2', 'F2', 'F2', 'F1', 'F2', 'F3',
+    'W', 'W', 'M', 'F2', 'F2', 'F2', 'F2', 'F1', 'F3', 'F3',
+    'W', 'W', 'F2', 'F2', 'F2', 'F2', 'F2', 'F3', 'F3', 'F3',
+];
+
 const GRID_SIZE = 10;
 const GRID_GAP_PX = 5;
 const TILE_SIZE_PX = 50;
@@ -25,6 +43,21 @@ const POINT_INNER_SIZE_PX = POINT_SIZE_PX - 2 * POINT_BORDER_PX;
 const PLAYER_POSITION_INCREMENT = TILE_SIZE_PX + (TILE_SIZE_PX - PLAYER_SIZE_PX) / 2;
 const PLAYER_POSITION_CONSTANT = TILE_SIZE_PX - PLAYER_SIZE_PX;
 
+const TERRAIN = {
+    'F1': 'white',
+    'F2': 'lightgreen',
+    'F3': 'darkgreen',
+    'W': 'lightblue',
+    'M': 'yellow',
+};
+
+const COST = {
+    'F1': 1,
+    'F2': 1.5,
+    'F3': 2,
+    'W': 3,
+    'M': 1.25,
+};
 
 const createGrid = (size) => {
     const grid = document.createElement('div');
@@ -41,7 +74,7 @@ const createGrid = (size) => {
         const tile = document.createElement('div');
         tile.style.height = `${TILE_SIZE_PX}px`;
         tile.style.width = `${TILE_SIZE_PX}px`;
-        tile.style.backgroundColor = 'white';
+        tile.style.backgroundColor = TERRAIN[MAP[i]] || 'purple';
         grid.appendChild(tile);
     }
 
@@ -89,7 +122,8 @@ const listenOnArrows = () => {
         }
 
         window.playerCoordinates = result;
-        updatePlayerPosition(window.player, window.playerCoordinates);
+        updatePlayerPosition(window.player, result);
+        updateCost(result);
     };
 };
 
@@ -148,12 +182,12 @@ const createLine = (pointA, pointB) => {
 };
 
 const loadMap = () => {
-    MAP.forEach((point, index) => {
+    COURSE.forEach((point, index) => {
         createPoint(point);
 
 
         const nextIndex = index + 1;
-        const nextPoint = MAP[nextIndex];
+        const nextPoint = COURSE[nextIndex];
 
         if (nextPoint) {
             createLine(point, nextPoint);
@@ -163,12 +197,12 @@ const loadMap = () => {
 
 const trackPoint = (pointToTrackIndex = 0) => {
     window.pointToTrackIndex = pointToTrackIndex;
-    const pointToTrack = MAP[pointToTrackIndex];
+    const pointToTrack = COURSE[pointToTrackIndex];
 
     if (!pointToTrack) {
         document.getElementById('tracker').textContent = `FINISHED!!!`;
         setTimeout(() => {
-            if (window.confirm('Well done! You finished the course. Click OK to restart the game.')) {
+            if (window.confirm(`Well done! You finished the course with a cost of ${window.cost}. Want to beat it? Press OK to restart the game.`)) {
                 location.reload();
             }
         }, 0);
@@ -179,8 +213,19 @@ const trackPoint = (pointToTrackIndex = 0) => {
     document.getElementById('tracker').textContent = `Go to (${pointToTrack.x}, ${pointToTrack.y})`;
 };
 
+const updateCost = (coordinates) => {
+    const moveIndex = coordinates.x + coordinates.y * 10;
+    const terrain = MAP[moveIndex];
+    const moveCost = COST[terrain];
+    console.log(`Cost ${moveCost} for move on ${MAP[moveIndex]}`);
+    window.cost += moveCost;
+
+    document.getElementById('cost').textContent = `Total move cost: ${window.cost}`;
+};
+
 window.addEventListener('DOMContentLoaded', (event) => {
     window.container = document.getElementById('container');
+    window.cost = 0;
 
     createGrid(GRID_SIZE);
     createPlayer();
