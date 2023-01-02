@@ -124,8 +124,8 @@ const listenOnArrows = () => {
         }
 
         window.playerCoordinates = result;
-        updatePlayerPosition(window.player, result);
         updateCost(result);
+        updatePlayerPosition(window.player, result);
     };
 };
 
@@ -207,8 +207,13 @@ const trackPoint = (pointToTrackIndex = 0) => {
     window.pointToTrackIndex = pointToTrackIndex;
     const pointToTrack = COURSE[pointToTrackIndex];
 
-    if (!pointToTrack) {
+    if (pointToTrack) {
+        window.pointToTrack = pointToTrack;
+        document.getElementById('tracker').textContent = `Go to ${window.pointToTrackIndex + 1}`;
+    } else {
         document.getElementById('tracker').textContent = `FINISHED!!!`;
+        window.localStorage.previousCost = window.cost;
+        window.localStorage.bestCost = Math.min(window.localStorage.bestCost || Infinity, window.cost);
         setTimeout(() => {
             if (window.confirm(`Well done! You finished the course with a cost of ${window.cost}. Want to beat it? Press OK to restart the game.`)) {
                 location.reload();
@@ -217,18 +222,17 @@ const trackPoint = (pointToTrackIndex = 0) => {
         return;
     }
 
-    window.pointToTrack = pointToTrack;
-    document.getElementById('tracker').textContent = `Go to ${window.pointToTrackIndex + 1}`;
+    if (window.localStorage.previousCost) document.getElementById('previous').textContent = `Previous: ${window.localStorage.previousCost}`;
+    if (window.localStorage.bestCost) document.getElementById('best').textContent = `Your best: ${window.localStorage.bestCost}`;
 };
 
 const updateCost = (coordinates) => {
     const moveIndex = coordinatesToIndex(coordinates);
     const terrain = MAP[moveIndex];
     const moveCost = COST[terrain];
-    console.log(`Cost ${moveCost} for move on ${MAP[moveIndex]}`);
     window.cost += moveCost;
 
-    document.getElementById('cost').textContent = `Total move cost: ${window.cost}`;
+    document.getElementById('cost').textContent = `Cost: ${window.cost}`;
 };
 
 window.addEventListener('DOMContentLoaded', (event) => {
