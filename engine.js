@@ -177,10 +177,10 @@ const createLine = (pointA, pointB) => {
     window.container.appendChild(line);
 };
 
-const loadMap = () => {
-    for (let i = 0; i < MAP.length; i++) {
+const loadMap = (map) => {
+    for (let i = 0; i < map.length; i++) {
         const tile = document.getElementById('grid').children[i];
-        tile.style.backgroundColor = TERRAIN[MAP[i]] || 'purple';
+        tile.style.backgroundColor = TERRAIN[map[i]] || 'purple';
     }
 };
 
@@ -241,7 +241,8 @@ function createTile(id) {
 }
 
 export function createGrid(width, height) {
-    const grid = document.createElement('div');
+    const grid = document.getElementById('grid') || document.createElement('div');
+    grid.textContent = '';
     grid.id = 'grid';
     grid.style.display = 'grid';
     grid.style.background = 'black';
@@ -263,14 +264,11 @@ export function createGrid(width, height) {
 
 export function updateGrid(width, height) {
     const grid = document.getElementById('grid');
+    grid.textContent = '';
     grid.style.gridTemplateColumns = `repeat(${width}, 1fr)`;
     grid.style.gridTemplateRows = `repeat(${height}, 1fr)`;
 
     const elementsNumber = width * height;
-    console.log(grid.children[0]);
-
-    const terrainOptionsMax = Object.keys(TERRAIN).length;
-    const currentMap = [];
 
     for (let i = 0; i < elementsNumber; i++) {
         let tile = grid.children[i];
@@ -279,20 +277,41 @@ export function updateGrid(width, height) {
             tile = createTile(i);
             grid.appendChild(tile);
         }
+    }
 
-        const terrrainKeys = Object.keys(TERRAIN);
+    window.currentMapDimensions = {width, height};
+}
+
+export function randomiseTerrain() {
+    const currentMap = [];
+    const terrainOptionsMax = Object.keys(TERRAIN).length;
+    const terrrainKeys = Object.keys(TERRAIN);
+    const elementsNumber = window.currentMapDimensions.width * window.currentMapDimensions.height;
+
+    for (let i = 0; i < elementsNumber; i++) {
         const randomIndex = parseInt(Math.random() * terrainOptionsMax);
-        console.log(randomIndex);
         const terrainType = terrrainKeys[randomIndex];
         currentMap.push(terrainType);
-        tile.style.backgroundColor = TERRAIN[terrainType];
+
+        grid.children[i].style.backgroundColor = TERRAIN[terrainType];
     }
 
     window.currentMap = currentMap;
 }
 
-export function exportMap() {
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(window.currentMap));
+export function importMapAndCourse(mapAndCourse) {
+    const {width, height} = mapAndCourse.mapDimensions;
+    createGrid(width, height);
+    loadMap(mapAndCourse.map);
+    loadCourse(mapAndCourse.course);
+}
+
+export function exportMapAndCourse() {
+    const map = window.currentMap;
+    const course = window.currentCourse;
+    const mapDimensions = window.currentMapDimensions;
+
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({map, mapDimensions, course}));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute('href', dataStr);
     downloadAnchorNode.setAttribute('download', 'scene.json');
@@ -313,7 +332,7 @@ export function init() {
     createGrid(GRID_SIZE, GRID_SIZE);
     createPlayer();
     updatePlayerPosition(window.player, {x: 0, y: 0});
-    loadMap();
+    loadMap(MAP);
     loadCourse();
     listenOnArrows();
     trackPoint();

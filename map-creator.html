@@ -5,27 +5,47 @@
     <title>Title</title>
 </head>
 <script type="module">
-    import { createGrid, updateGrid, exportMap, TERRAIN, updateTile, loadCourse } from './engine.js';
+    import {
+        createGrid,
+        updateGrid,
+        importMapAndCourse,
+        exportMapAndCourse,
+        TERRAIN,
+        updateTile,
+        loadCourse,
+        randomiseTerrain,
+    } from './engine.js';
 
     let width = 10;
     let height = 10;
-    const course = [];
+    window.currentCourse = [];
 
     window.addEventListener('DOMContentLoaded', () => {
         createGrid(width, height);
 
         document.getElementById('width').addEventListener('change', (event) => {
             width = event.target.valueAsNumber;
-            console.log(width, height);
             updateGrid(width, height);
+            randomiseTerrain();
         });
         document.getElementById('height').addEventListener('change', (event) => {
             height = event.target.valueAsNumber;
-            console.log(width, height);
             updateGrid(width, height);
+            randomiseTerrain();
+        });
+        document.getElementById('import').addEventListener('change', (event) => {
+            console.log(document.getElementById('import'));
+            console.log(event);
+            const fileReader = new FileReader();
+            fileReader.onload = () => {
+                const mapAndCourse = JSON.parse(fileReader.result);
+                console.log(mapAndCourse);
+                importMapAndCourse(mapAndCourse);
+            };
+            fileReader.readAsText(event.target.files[0]);
         });
         document.getElementById('export').addEventListener('click', () => {
-            exportMap();
+            exportMapAndCourse();
         });
         document.getElementById('grid').addEventListener('click', (event) => {
             const index = parseInt(event.target.id);
@@ -36,8 +56,8 @@
             if (pickedTool === 'course-tool') {
                 const x = index % width;
                 const y = parseInt(index / width);
-                course.push({x, y});
-                loadCourse(course);
+                window.currentCourse.push({x, y});
+                loadCourse(window.currentCourse);
             } else {
                 updateTile(index, pickedTool);
             }
@@ -66,12 +86,15 @@
 <div id="configuration" style="display: flex">
     <label for="width">Width</label><input id="width" type="number" value="10" min="1" />
     <label for="height">Height</label><input id="height" type="number" value="10" min="1" />
-    <button id="export">Export</button>
     <div id="terrain-tools">
 
     </div>
     <button id="course-tool" style="background: #b457f7; height: 20px; width: 20px;"></button>
+    <input type="file" id="import">
+    <button id="export">Export</button>
 </div>
 <div id="container" style="position:relative;"></div>
+
+<a href="index.html" style="position:fixed; bottom: 0;">Game</a>
 </body>
 </html>
