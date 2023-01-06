@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PLay</title>
+    <script type="module">
+        import {
+            createGrid,
+            updateGrid,
+            importMapAndCourse,
+            exportMapAndCourse,
+            TERRAIN,
+            updateTile,
+            loadCourse,
+            randomiseTerrain,
+        } from './engine.js';
+
+        function readTextFile(file, callback) {
+            const rawFile = new XMLHttpRequest();
+            rawFile.overrideMimeType("application/json");
+            rawFile.open("GET", file, true);
+            rawFile.onreadystatechange = function() {
+                if (rawFile.readyState === 4 && rawFile.status == "200") {
+                    callback(rawFile.responseText);
+                }
+            }
+            rawFile.send(null);
+        }
+
+        window.addEventListener('DOMContentLoaded', (event) => {
+            let pickedMap;
+            const mapPicker = document.getElementById('map-picker');
+            const mapFiles = ['map1.json', 'map2.json'];
+            mapFiles.forEach(mapFile => {
+                const option = document.createElement('option');
+                option.value = mapFile;
+                option.innerText = mapFile;
+                mapPicker.appendChild(option);
+            });
+            mapPicker.addEventListener('change', (event) => {
+                pickedMap = event.target.value;
+                readTextFile(`maps/${pickedMap}`, function(text){
+                    const mapAndCourse = JSON.parse(text);
+                    importMapAndCourse(mapAndCourse);
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+<label for="map-picker">Select map:</label><select id="map-picker"></select>
+<div id="container"></div>
+</body>
+</html>
